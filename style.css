@@ -1,0 +1,160 @@
+/* Paleta: azul-aço (#1e3a8a), laranja industrial (#f97316), cinza leve (#f3f4f6) */
+
+body {
+  font-family: "Inter", Arial, sans-serif;
+  margin: 0;
+  background: #f3f4f6;
+  color: #222;
+}
+
+/* Cabeçalho */
+header {
+  background: #1e3a8a;
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header nav a {
+  color: white;
+  margin-left: 20px;
+  text-decoration: none;
+  font-weight: 500;
+}
+header nav a.active {
+  border-bottom: 2px solid #f97316;
+}
+header nav a:hover {
+  color: #f97316;
+}
+
+/* Login */
+.login-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #1e3a8a, #0ea5e9);
+}
+.login-container {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  width: 320px;
+  text-align: center;
+}
+.login-container h1 {
+  margin-bottom: 20px;
+  color: #1e3a8a;
+}
+.login-form input {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.login-form button {
+  width: 100%;
+  padding: 10px;
+  background: #92acf3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.login-form button:hover {
+  background: #f97316;
+}
+
+/* Dashboard */
+.dashboard {
+  padding: 20px;
+}
+.cards {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.card {
+  flex: 1;
+  min-width: 200px;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.card h3 {
+  margin: 0;
+  color: #555;
+}
+.card p {
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+.card.warning { border-left: 5px solid #f97316; }
+.card.success { border-left: 5px solid #22c55e; }
+.card.danger { border-left: 5px solid #ef4444; }
+
+/* Estoque */
+.estoque-page {
+  padding: 20px;
+  display: grid;
+  gap: 20px;
+}
+.estoque-form, .estoque-lista {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+.estoque-form form {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+.estoque-form button {
+  grid-column: 1 / -1;
+  background: #92acf3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+}
+.estoque-form button:hover {
+  background: #f97316;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+tr.baixo {
+  background: #fee2e2;
+}
+button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  opacity: 0.8;
+}
+
+footer {
+  background: #92acf3;
+  color: white;
+  text-align: center;
+  padding: 12px;
+  margin-top: 20px;
+}
+

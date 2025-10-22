@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sistema de Estoque — Ferramentas e Equipamentos Manuais</title>
+  <style>
+    :root {
+      --accent:#0b74de;
+      --danger:#d9534f;
+      --muted:#666;
+    }
+    body {
+      font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0;
+      background: #f6f8fa;
+      color: #0b2540;
+    }
+
+    /* === LOGIN === */
+    .login-screen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #0b74de, #2563eb);
+    }
+    .login-box {
+      background: white;
+      padding: 36px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+      width: 320px;
+      text-align: center;
+    }
+    .login-box h1 {
+      color: #0b74de;
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #0b74de;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .login-box button:hover {
+      background: #f97316;
+    }
+
+    /* === ESTOQUE === */
+    header {
+      background: linear-gradient(90deg,#ffffff, #f0f6ff);
+      padding: 18px 24px;
+      border-bottom: 1px solid #e6eef9;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 18px;
+    }
+    h1 { margin: 0; font-size: 20px }
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin: 16px 0;
+    }
+    input, select, button, textarea {
+      font-size: 14px;
+      padding: 8px 10px;
+      border: 1px solid #d0d9e9;
+      border-radius: 6px;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #fff;
+      color: var(--accent);
+      border: 1px solid #cfe3ff;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 14px;
+      border: 1px solid #e9f0fb;
+      box-shadow: 0 2px 6px rgba(11,39,68,0.03);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #f1f5fb;
+      font-size: 14px;
+    }
+    th {
+      background: #fbfdff;
+      font-weight: 600;
+    }
+    tr.low-stock {
+      background: linear-gradient(90deg, rgba(217,83,79,0.06), transparent);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+    .badge.green { background: #e6f6ea; color: #216e3a }
+    .badge.red { background: #fdecea; color: #a33 }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 10px;
+    }
+    .form-grid .full { grid-column: 1/-1 }
+    .small { width: 80px }
+    .actions button { margin-right: 6px }
+    .muted { color: var(--muted); font-size: 13px }
+    footer {
+      margin: 36px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media(max-width:900px) {
+      .form-grid { grid-template-columns: repeat(2,1fr) }
+      .small { width: 100% }
+    }
+
+    /* Ocultar estoque até login */
+    #estoque-screen { display: none; }
+  </style>
+</head>
+
+<body>
+  <!-- ======= TELA DE LOGIN ======= -->
+  <section id="login-screen" class="login-screen">
+    <div class="login-box">
+      <h1>🔧 Sistema de Estoque</h1>
+      <form onsubmit="return fazerLogin(event)">
+        <input type="text" id="usuario" placeholder="Usuário" required>
+        <input type="password" id="senha" placeholder="Senha" required>
+        <button type="submit">Entrar</button>
+      </form>
+      <p style="color:#555;font-size:13px;margin-top:10px">Dica: Giovanna Arantes / Corinthans</p>
+    </div>
+  </section>
+
+  <!-- ======= TELA DE ESTOQUE ======= -->
+  <section id="estoque-screen">
+    <header>
+      <div class="container">
+        <h1>Sistema de Estoque — Ferramentas e Equipamentos Manuais</h1>
+        <p class="muted">Gerencie entrada, saída e alertas de estoque mínimo.</p>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="controls">
+        <input id="search" placeholder="Buscar..." style="flex:1" />
+        <select id="filterLow">
+          <option value="all">Todos</option>
+          <option value="low">Abaixo do mínimo</option>
+          <option value="ok">Acima do mínimo</option>
+        </select>
+        <button id="exportCsv">Exportar CSV</button>
+        <button id="clearStorage" class="secondary">Limpar dados</button>
+        <button onclick="logout()" class="secondary">Sair</button>
+      </div>
+
+      <section class="card">
+        <h3>Adicionar / Atualizar Ferramenta</h3>
+        <form id="toolForm">
+          <div class="form-grid">
+            <input type="hidden" id="toolId" />
+            <label>
+              <div>Nome</div>
+              <input id="name" required placeholder="Ex: Martelo" />
+            </label>
+            <label>
+              <div>Tamanho</div>
+              <input id="size" placeholder="Ex: 16oz" />
+            </label>
+            <label>
+              <div>Modelo / Marca</div>
+              <input id="model" placeholder="Ex: Stanley" />
+            </label>
+            <label>
+              <div>Qtd</div>
+              <input id="qty" type="number" min="0" value="0" class="small" />
+            </label>
+            <label>
+              <div>Mínimo</div>
+              <input id="minStock" type="number" min="0" value="1" class="small" />
+            </label>
+            <label class="full">
+              <div>Observação</div>
+              <textarea id="note" rows="2"></textarea>
+            </label>
+            <div class="full" style="display:flex;gap:8px">
+              <button type="submit">Salvar</button>
+              <button type="button" id="clearForm" class="secondary">Limpar</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" style="margin-top:20px">
+        <h3>Produtos</h3>
+        <div id="alerts" class="muted"></div>
+        <table id="toolsTable">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Tamanho</th>
+              <th>Modelo</th>
+              <th>Qtd</th>
+              <th>Mínimo</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section class="card" style="margin-top:20px">
+        <h3>Histórico</h3>
+        <table id="historyTable">
+          <thead>
+            <tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Responsável</th><th>Observação</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <footer>© 2025 Sistema de Estoque Local</footer>
+    </main>
+  </section>
+
+  <script>
+    // ===== LOGIN =====
+    function fazerLogin(e){
+      e.preventDefault();
+      const u = document.getElementById('usuario').value.trim();
+      const s = document.getElementById('senha').value.trim();
+      if(u === 'Giovanna Arantes' && s === 'Corinthans'){
+        document.getElementById('login-screen').style.display='none';
+        document.getElementById('estoque-screen').style.display='block';
+      } else {
+        alert('Usuário ou senha incorretos!');
+      }
+    }
+    function logout(){
+      document.getElementById('estoque-screen').style.display='none';
+      document.getElementById('login-screen').style.display='flex';
+    }
+
+    // ===== ESTOQUE =====
+    const STORAGE_KEY = 'tools_inventory_v1';
+    const HISTORY_KEY = 'tools_history_v1';
+
+    function uid(){return Math.random().toString(36).slice(2,9)}
+    function qs(id){return document.getElementById(id)}
+
+    const defaultData = [
+      {id:uid(),name:'Martelo',size:'16oz',model:'Stanley',qty:10,minStock:3,note:''},
+      {id:uid(),name:'Alicate',size:'8"',model:'Gedore',qty:6,minStock:2,note:''}
+    ];
+
+    function loadTools(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw){localStorage.setItem(STORAGE_KEY,JSON.stringify(defaultData));return defaultData}
+      try{return JSON.parse(raw)}catch{localStorage.removeItem(STORAGE_KEY);return defaultData}
+    }
+    function saveTools(list){localStorage.setItem(STORAGE_KEY,JSON.stringify(list))}
+    function loadHistory(){const raw=localStorage.getItem(HISTORY_KEY);return raw?JSON.parse(raw):[]}
+    function saveHistory(h){localStorage.setItem(HISTORY_KEY,JSON.stringify(h))}
+
+    function renderTable(){
+      const tbody=qs('toolsTable').querySelector('tbody')
+      tbody.innerHTML=''
+      const q=qs('search').value.toLowerCase()
+      const filter=qs('filterLow').value
+      const list=loadTools().filter(it=>{
+        const match=[it.name,it.model,it.size].join(' ').toLowerCase().includes(q)
+        if(!match)return false
+        if(filter==='low')return it.qty<it.minStock
+        if(filter==='ok')return it.qty>=it.minStock
+        return true
+      })
+      let lowCount=0
+      for(const it of list){
+        const tr=document.createElement('tr')
+        if(it.qty<it.minStock){tr.classList.add('low-stock');lowCount++}
+        tr.innerHTML=`
+          <td>${it.name}</td><td>${it.size||'-'}</td><td>${it.model||'-'}</td>
+          <td><span class="badge ${it.qty>=it.minStock?'green':'red'}">${it.qty}</span></td>
+          <td>${it.minStock}</td>
+          <td class="actions">
+            <button onclick="editTool('${it.id}')">Editar</button>
+            <button onclick="adjustQty('${it.id}',-1)">-1</button>
+            <button onclick="adjustQty('${it.id}',1)">+1</button>
+            <button onclick="removeTool('${it.id}')" class="secondary">Apagar</button>
+          </td>`
+        tbody.appendChild(tr)
+      }
+      qs('alerts').innerHTML = lowCount ? `<b>${lowCount}</b> produto(s) abaixo do mínimo.` : 'Nenhum alerta ativo.';
+      renderHistory()
+    }
+
+    function renderHistory(){
+      const tbody=qs('historyTable').querySelector('tbody')
+      const h=loadHistory(); tbody.innerHTML=''
+      for(const x of h.slice().reverse()){
+        const tr=document.createElement('tr')
+        tr.innerHTML=`<td>${new Date(x.date).toLocaleString()}</td><td>${x.product}</td><td>${x.type}</td><td>${x.qty}</td><td>${x.user||'-'}</td><td>${x.note||''}</td>`
+        tbody.appendChild(tr)
+      }
+    }
+
+    function recordHistory(product, qty, type, note){
+      const h=loadHistory()
+      h.push({id:uid(),date:new Date().toISOString(),product,qty,type,user:'Giovanna Arantes',note})
+      saveHistory(h)
+    }
+
+    function addOrUpdateTool(e){
+      e.preventDefault()
+      const id=qs('toolId').value
+      const name=qs('name').value.trim()
+      const size=qs('size').value.trim()
+      const model=qs('model').value.trim()
+      const qty=parseInt(qs('qty').value||0)
+      const minStock=parseInt(qs('minStock').value||0)
+      const note=qs('note').value.trim()
+      if(!name)return alert('Informe o nome da ferramenta!')
+      const list=loadTools()
+      if(id){
+        const i=list.findIndex(x=>x.id===id)
+        const prev=list[i]; if(prev.qty!==qty){recordHistory(prev.name,qty-prev.qty,qty>prev.qty?'entrada':'saida',note)}
+        list[i]={...prev,name,size,model,qty,minStock,note}
+      }else{
+        const item={id:uid(),name,size,model,qty,minStock,note}
+        list.push(item);recordHistory(name,qty,'entrada',note)
+      }
+      saveTools(list);clearForm();renderTable()
+    }
+
+    function editTool(id){
+      const it=loadTools().find(x=>x.id===id)
+      if(!it)return
+      qs('toolId').value=it.id
+      qs('name').value=it.name
+      qs('size').value=it.size
+      qs('model').value=it.model
+      qs('qty').value=it.qty
+      qs('minStock').value=it.minStock
+      qs('note').value=it.note
+      window.scrollTo({top:0,behavior:'smooth'})
+    }
+
+    function adjustQty(id,delta){
+      const list=loadTools();const it=list.find(x=>x.id===id);if(!it)return
+      it.qty=Math.max(0,it.qty+delta)
+      saveTools(list)
+      recordHistory(it.name,Math.abs(delta),delta>0?'entrada':'saida','Ajuste rápido')
+      renderTable()
+    }
+
+    function removeTool(id){
+      if(!confirm('Apagar este produto?'))return
+      let list=loadTools();const idx=list.findIndex(x=>x.id===id);if(idx===-1)return
+      recordHistory(list[idx].name,-list[idx].qty,'removido','Produto apagado')
+      list.splice(idx,1);saveTools(list);renderTable()
+    }
+
+    function clearForm(){
+      qs('toolForm').reset();qs('toolId').value='';qs('qty').value=0;qs('minStock').value=1
+    }
+
+    function exportCsv(){
+      const list=loadTools()
+      const rows=['Nome,Tamanho,Modelo,Quantidade,Mínimo,Observação']
+      for(const r of list)rows.push([r.name,r.size,r.model,r.qty,r.minStock,'"'+(r.note||'')+'"'].join(','))
+      const blob=new Blob([rows.join('\n')],{type:'text/csv'})
+      const url=URL.createObjectURL(blob)
+      const a=document.createElement('a');a.href=url;a.download='estoque.csv';a.click();URL.revokeObjectURL(url)
+    }
+
+    function clearStorage(){
+      if(!confirm('Limpar todos os dados?'))return
+      localStorage.removeItem(STORAGE_KEY);localStorage.removeItem(HISTORY_KEY);location.reload()
+    }
+
+    qs('toolForm').addEventListener('submit',addOrUpdateTool)
+    qs('clearForm').addEventListener('click',clearForm)
+    qs('search').addEventListener('input',renderTable)
+    qs('filterLow').addEventListener('change',renderTable)
+    qs('exportCsv').addEventListener('click',exportCsv)
+    qs('clearStorage').addEventListener('click',clearStorage)
+  </script>
+</body>
+</html>
